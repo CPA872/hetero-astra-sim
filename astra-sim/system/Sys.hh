@@ -20,6 +20,7 @@ LICENSE file in the root directory of this source tree.
 #include "astra-sim/system/topology/RingTopology.hh"
 #include "astra-sim/workload/Workload.hh"
 
+
 namespace AstraSim {
 
 class BaseStream;
@@ -58,6 +59,7 @@ class Sys : public Callable {
     std::vector<uint64_t> total_active_chunks_per_dimension;
     std::map<int, int> queue_id_to_dimension;
     std::vector<UsageTracker> usage;
+
   };
   //---------------------------------------------------------------------------
 
@@ -67,6 +69,8 @@ class Sys : public Callable {
       std::string comm_group_configuration,
       std::string system_configuration,
       std::string compute_model,
+      int system_type_id,
+
       AstraRemoteMemoryAPI* remote_mem,
       AstraNetworkAPI* comm_NI,
       std::vector<int> physical_dims,
@@ -269,6 +273,9 @@ class Sys : public Callable {
   AstraNetworkAPI* comm_NI;
   double comm_scale;
   bool rendezvous_enabled;
+
+  // heterogenoeus Compute type
+  SystemType system_type;    
 
   // scheduler
   SchedulerUnit* scheduler_unit;

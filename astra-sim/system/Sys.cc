@@ -142,6 +142,7 @@ Sys::Sys(
     string comm_group_configuration,
     string system_configuration,
     string compute_model,
+    int system_type_id,
     AstraRemoteMemoryAPI* remote_mem,
     AstraNetworkAPI* comm_NI,
     vector<int> physical_dims,
@@ -166,6 +167,7 @@ Sys::Sys(
   // compute API setup
   this->compute_model_enabled = compute_model == "compute-api";
   this->compute_api = nullptr;
+  this->system_type = static_cast<SystemType>(system_type_id);
 
   this->replay = compute_model == "replay";
 

@@ -19,6 +19,8 @@ enum time_type_e { SE = 0, MS, US, NS, FS };
 
 enum req_type_e { UINT8 = 0, BFLOAT16, FP32 };
 
+enum class SystemType {GPU, CPU, CME_BIG, CME_SMALL};
+
 struct timespec_t {
   time_type_e time_res;
   long double time_val;

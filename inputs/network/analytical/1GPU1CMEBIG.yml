@@ -5,7 +5,7 @@
 # And each link latency is 500 ns.
 
 # FullyConnected Topology
-topology: [Switch] # Ring, Switch, FullyConnected
+topology: [FullyConnected] # Ring, Switch, FullyConnected
 
 # 64 NPUs
 npus_count: [2] # number of NPUs

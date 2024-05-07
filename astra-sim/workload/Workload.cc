@@ -204,7 +204,7 @@ void Workload::issue_comp(shared_ptr<Chakra::ETFeederNode> node) {
     string name = node->name();
     cout << "Compute API: " << name << " \n";
     // TODO: to be implemented
-
+    
     uint64_t runtime;
     if (name.find("GPU") != string::npos) {
       // connect to A100 profiling results
@@ -216,7 +216,6 @@ void Workload::issue_comp(shared_ptr<Chakra::ETFeederNode> node) {
     } else if (name.find("CMESMALL") != string::npos) {
 
     }
-
 
   } else if (sys->replay) {
     // advance this node forward the recorded "replayed" time specificed in the
