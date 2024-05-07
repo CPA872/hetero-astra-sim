@@ -31,6 +31,8 @@ int main(int argc, char* argv[]) {
       cmd_line_parser.get<std::string>("system-configuration");
   const auto remote_memory_configuration =
       cmd_line_parser.get<std::string>("remote-memory-configuration");
+  const auto compute_model = 
+      cmd_line_parser.get<std::string>("compute-model");
   const auto network_configuration =
       cmd_line_parser.get<std::string>("network-configuration");
   const auto num_queues_per_dim =
@@ -76,6 +78,7 @@ int main(int argc, char* argv[]) {
         workload_configuration,
         comm_group_configuration,
         system_configuration,
+        compute_model,
         memory_api.get(),
         network_api.get(),
         npus_count_per_dim,

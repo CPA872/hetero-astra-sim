@@ -8,6 +8,6 @@
   "reduce-scatter-implementation": ["direct"],
   "all-to-all-implementation": ["direct"],
   "collective-optimization": "localBWAware",
-  "local-mem-bw": 50,
+  "local-mem-bw": 1,
   "boost-mode": 0
 }

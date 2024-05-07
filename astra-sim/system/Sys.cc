@@ -29,6 +29,7 @@ LICENSE file in the root directory of this source tree.
 #include "astra-sim/system/scheduling/OfflineGreedy.hh"
 #include "astra-sim/system/topology/BasicLogicalTopology.hh"
 #include "astra-sim/system/topology/GeneralComplexTopology.hh"
+#include "Sys.hh"
 
 using namespace std;
 using namespace Chakra;
@@ -140,6 +141,7 @@ Sys::Sys(
     string workload_configuration,
     string comm_group_configuration,
     string system_configuration,
+    string compute_model,
     AstraRemoteMemoryAPI* remote_mem,
     AstraNetworkAPI* comm_NI,
     vector<int> physical_dims,
@@ -157,9 +159,15 @@ Sys::Sys(
 
   this->workload = nullptr;
 
-  this->roofline_enabled = false;
+  this->roofline_enabled = compute_model == "roofline";
   this->peak_perf = 0;
   this->roofline = nullptr;
+
+  // compute API setup
+  this->compute_model_enabled = compute_model == "compute-api";
+  this->compute_api = nullptr;
+
+  this->replay = compute_model == "replay";
 
   this->remote_mem = remote_mem;
   this->remote_mem->set_sys(id, this);

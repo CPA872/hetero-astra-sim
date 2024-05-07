@@ -21,7 +21,7 @@ void CmdLineParser::define_options() noexcept {
       "Workload configuration file",
       cxxopts::value<std::string>())(
       "comm-group-configuration",
-      "Communicator group configuration fi`le",
+      "Communicator group configuration file",
       cxxopts::value<std::string>()->default_value("empty"))(
       "system-configuration",
       "System configuration file",
@@ -29,6 +29,9 @@ void CmdLineParser::define_options() noexcept {
       "remote-memory-configuration",
       "Remote memory configuration file",
       cxxopts::value<std::string>())(
+      "compute-model",
+      "compute-model: replay, compute-api, or roofline",
+      cxxopts::value<std::string>()->default_value("replay"))(
       "network-configuration",
       "Network configuration file",
       cxxopts::value<std::string>())(

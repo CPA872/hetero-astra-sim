@@ -11,20 +11,20 @@ LICENSE file in the root directory of this source tree.
 #include <iostream>
 #include <string>
 #include <unordered_map>
-#include "Common.hh"
-#include "AstraNetworkAPI.hh"
+#include "astra-sim/system/Common.hh"
+#include "astra-sim/system/AstraNetworkAPI.hh"
 
 namespace AstraSim {
 class Sys;
 enum class ComputeKernelType{GEMM, Batch_GEMM, Softmax, LLM_RMSNorm, LLM_Residual_Addition, Llama_Attn, Llama_MLP};
-enum class ComputeKernelPhase{FWD,BCKWD, INFERENCE_TOKENGEN, INFERENCE_PREFILL};
+enum class ComputeKernelPhase{FWD, BCKWD, INFERENCE_TOKENGEN, INFERENCE_PREFILL};
 
 class ComputeKernel{
   public:
     ComputeKernelType type;
     ComputeKernelPhase phase;
-    std::unordered_map<std::string,std::string> attributes;
-    ComputeKernel(ComputeKernelType type,ComputeKernelPhase phase,std::unordered_map<std::string,std::string> attributes){
+    std::unordered_map<std::string, std::string> attributes;
+    ComputeKernel(ComputeKernelType type, ComputeKernelPhase phase, std::unordered_map<std::string, std::string> attributes) {
       this->type=type;
       this->phase=phase;
       this->attributes=attributes;
@@ -41,11 +41,11 @@ class ComputeKernelSimulationMetaData {
 };
 class AstraComputeAPI {
  public:
-  
   // gets the runtime in a blocking manner
-  virtual timespec_t get_static_runtime(
-    ComputeKernel &kernel
-  ) {timespec_t t; return t;};
+  virtual timespec_t get_static_runtime(ComputeKernel &kernel) {
+    timespec_t t; 
+    return t;
+  };
 
   // simulates the runtime asynchronously and calls the system layer once it is done
   virtual void simulate(
@@ -54,7 +54,7 @@ class AstraComputeAPI {
       void (*msg_handler)(void* fun_arg),
       ComputeKernelSimulationMetaData* fun_arg) {return;};
 
-  //virtual ~AstraComputeAPI() = 0;
+  virtual ~AstraComputeAPI() = 0;
 };
 } // namespace AstraSim
 #endif

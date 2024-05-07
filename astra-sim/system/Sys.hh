@@ -10,6 +10,7 @@ LICENSE file in the root directory of this source tree.
 
 #include "astra-sim/system/AstraNetworkAPI.hh"
 #include "astra-sim/system/AstraRemoteMemoryAPI.hh"
+#include "astra-sim/system/AstraComputeAPI.hh"
 #include "astra-sim/system/Callable.hh"
 #include "astra-sim/system/CollectivePhase.hh"
 #include "astra-sim/system/CommunicatorGroup.hh"
@@ -65,6 +66,7 @@ class Sys : public Callable {
       std::string workload_configuration,
       std::string comm_group_configuration,
       std::string system_configuration,
+      std::string compute_model,
       AstraRemoteMemoryAPI* remote_mem,
       AstraNetworkAPI* comm_NI,
       std::vector<int> physical_dims,
@@ -241,6 +243,12 @@ class Sys : public Callable {
   bool roofline_enabled;
   double peak_perf;
   Roofline* roofline;
+
+  // compute API
+  bool compute_model_enabled;
+  AstraComputeAPI* compute_api;
+
+  bool replay;
 
   // memory
   double local_mem_bw;

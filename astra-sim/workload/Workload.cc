@@ -12,6 +12,8 @@ LICENSE file in the root directory of this source tree.
 #include "astra-sim/system/SendPacketEventHandlerData.hh"
 #include "astra-sim/system/WorkloadLayerHandlerData.hh"
 
+// #include "spdlog/spdlog.h" 
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <iostream>
@@ -95,6 +97,11 @@ void Workload::initialize_comm_group(string comm_group_filename) {
 void Workload::issue_dep_free_nodes() {
   std::queue<shared_ptr<Chakra::ETFeederNode>> push_back_queue;
   shared_ptr<Chakra::ETFeederNode> node = et_feeder->getNextIssuableNode();
+
+  if (node != nullptr) {
+    cout << "[DEBUG] Issuable Chakra Node " << node->name() << endl;
+  }
+
   while (node != nullptr) {
     if (hw_resource->is_available(node)) {
       issue(node);
@@ -160,8 +167,9 @@ void Workload::issue_replay(shared_ptr<Chakra::ETFeederNode> node) {
   uint64_t runtime = 1ul;
   if (node->runtime() != 0ul)
     // chakra runtimes are in microseconds and we should convert it into
-    // nanoseconds
+    // nanoseconds // TODO [NOTE THIS PROBLEM]
     runtime = node->runtime() * 1000;
+    cout << "[DEBUG workload.cc], issue replay compute time is " << runtime << endl;
   sys->register_event(this, EventType::General, wlhd, runtime);
 }
 
@@ -177,6 +185,8 @@ void Workload::issue_remote_mem(shared_ptr<Chakra::ETFeederNode> node) {
 
 void Workload::issue_comp(shared_ptr<Chakra::ETFeederNode> node) {
   hw_resource->occupy(node);
+  cout << "[DEBUG workload.cc] Sys[" << sys->id << "] Comp " << node->name()
+       << endl;
 
   if (sys->roofline_enabled) {
     WorkloadLayerHandlerData* wlhd = new WorkloadLayerHandlerData;
@@ -188,10 +198,33 @@ void Workload::issue_comp(shared_ptr<Chakra::ETFeederNode> node) {
     double elapsed_time = static_cast<double>(node->num_ops()) / perf;
     uint64_t runtime = static_cast<uint64_t>(elapsed_time);
     sys->register_event(this, EventType::General, wlhd, runtime);
-  } else {
+
+  // [TODO] COMPUTE API Insertion 
+  } else if (sys->compute_model_enabled) {
+    string name = node->name();
+    cout << "Compute API: " << name << " \n";
+    // TODO: to be implemented
+
+    uint64_t runtime;
+    if (name.find("GPU") != string::npos) {
+      // connect to A100 profiling results
+
+    } else if (name.find("CPU") != string::npos) {
+
+    } else if (name.find("CMEBIG") != string::npos) {
+
+    } else if (name.find("CMESMALL") != string::npos) {
+
+    }
+
+
+  } else if (sys->replay) {
     // advance this node forward the recorded "replayed" time specificed in the
-    // ET.
+    // ET. There is no "simulation" done this way. 
     issue_replay(node);
+  } else {
+    cerr << "Unsupported compute model" << endl;
+    exit(5);
   }
 }
 
