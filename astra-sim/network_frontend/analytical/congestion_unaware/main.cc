@@ -31,6 +31,8 @@ int main(int argc, char* argv[]) {
       cmd_line_parser.get<std::string>("system-configuration");
   const auto remote_memory_configuration =
       cmd_line_parser.get<std::string>("remote-memory-configuration");
+  const auto compute_model = 
+      cmd_line_parser.get<std::string>("compute-model");
   const auto network_configuration =
       cmd_line_parser.get<std::string>("network-configuration");
   const auto num_queues_per_dim =
@@ -71,11 +73,17 @@ int main(int argc, char* argv[]) {
   for (int i = 0; i < npus_count; i++) {
     // create network and system
     auto network_api = std::make_unique<CongestionUnawareNetworkApi>(i);
+    int system_type_id = (int) network_parser.get_id_to_compute().at(i);
+    // WARNING: DIRTY CODE
+    // SystemType system_type = static_cast<SystemType>(network_parser.get_id_to_compute().at(i));
+
     auto* const system = new Sys(
         i,
         workload_configuration,
         comm_group_configuration,
         system_configuration,
+        compute_model,
+        system_type_id,
         memory_api.get(),
         network_api.get(),
         npus_count_per_dim,
@@ -83,10 +91,6 @@ int main(int argc, char* argv[]) {
         injection_scale,
         comm_scale,
         rendezvous_protocol);
-
-    // push back network and system
-    network_apis.push_back(std::move(network_api));
-    systems.push_back(system);
   }
 
   // Initiate simulation

@@ -12,6 +12,8 @@ LICENSE file in the root directory of this source tree.
 #include "astra-sim/system/SendPacketEventHandlerData.hh"
 #include "astra-sim/system/WorkloadLayerHandlerData.hh"
 
+// #include "spdlog/spdlog.h" 
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <iostream>
@@ -95,6 +97,11 @@ void Workload::initialize_comm_group(string comm_group_filename) {
 void Workload::issue_dep_free_nodes() {
   std::queue<shared_ptr<Chakra::ETFeederNode>> push_back_queue;
   shared_ptr<Chakra::ETFeederNode> node = et_feeder->getNextIssuableNode();
+
+  // if (node != nullptr) {
+  //   cout << "[DEBUG] Issuable Chakra Node " << node->name() << endl;
+  // }
+
   while (node != nullptr) {
     if (hw_resource->is_available(node)) {
       issue(node);
@@ -160,8 +167,9 @@ void Workload::issue_replay(shared_ptr<Chakra::ETFeederNode> node) {
   uint64_t runtime = 1ul;
   if (node->runtime() != 0ul)
     // chakra runtimes are in microseconds and we should convert it into
-    // nanoseconds
+    // nanoseconds // TODO [NOTE THIS PROBLEM]
     runtime = node->runtime() * 1000;
+    cout << "[DEBUG workload.cc], issue replay compute time is " << runtime << endl;
   sys->register_event(this, EventType::General, wlhd, runtime);
 }
 
@@ -188,14 +196,51 @@ void Workload::issue_comp(shared_ptr<Chakra::ETFeederNode> node) {
     double elapsed_time = static_cast<double>(node->num_ops()) / perf;
     uint64_t runtime = static_cast<uint64_t>(elapsed_time);
     sys->register_event(this, EventType::General, wlhd, runtime);
-  } else {
+
+  // [TODO] COMPUTE API Insertion 
+  } else if (sys->compute_model_enabled) {
+    std::string name = node->name();
+    std::string sys_type = sys->compute_api->get_type();
+    cout << "[DEBUG] (Compute API) Chakra node: " << name << " | System " << sys->id << ": " << sys_type << "\n";
+    // TODO: to be implemented
+
+    uint64_t runtime = 10000;    
+    // chakra runtimes are in microseconds and we should convert it into
+    // nanoseconds // TODO [NOTE THIS PROBLEM]\
+
+    WorkloadLayerHandlerData* wlhd = new WorkloadLayerHandlerData;
+    wlhd->node_id = node->id(); // This is workload ID
+    wlhd->sys_id  = sys->id;    // This is System ID
+    
+    if (name.find("A100") != string::npos && "A100" == sys_type) {
+      // connect to A100 profiling results
+      cout << "[DEBUG] (Compute API) assign to " << sys->compute_api->get_type() << "\n";
+
+    } else if (name.find("CPU") != string::npos && "CPU" == sys_type) {
+      cout << "[DEBUG] (Compute API) assign to " << sys->compute_api->get_type() << "\n";
+
+    } else if (name.find("CME_BIG") != string::npos && "CME_BIG" == sys_type) {
+      cout << "[DEBUG] (Compute API) assign to " << sys->compute_api->get_type() << "\n";
+
+    } else if (name.find("CME_SMALL") != string::npos && "CME_SMALL" == sys_type) {
+      cout << "[DEBUG] (Compute API) assign to " << sys->compute_api->get_type() << "\n";
+
+    } 
+
+    sys->register_event(this, EventType::General, wlhd, runtime);
+
+  } else if (sys->replay) {
     // advance this node forward the recorded "replayed" time specificed in the
-    // ET.
+    // ET. There is no "simulation" done this way. 
     issue_replay(node);
+  } else {
+    cerr << "Unsupported compute model" << endl;
+    exit(5);
   }
 }
 
 void Workload::issue_comm(shared_ptr<Chakra::ETFeederNode> node) {
+  std::cout << "[DEBUG] issue_comm\n";
   hw_resource->occupy(node);
 
   vector<bool> involved_dim;

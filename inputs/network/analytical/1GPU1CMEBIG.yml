@@ -5,13 +5,16 @@
 # And each link latency is 500 ns.
 
 # FullyConnected Topology
-topology: [ Switch ]  # Ring, Switch, FullyConnected
+topology: [FullyConnected] # Ring, Switch, FullyConnected
 
-# 64 NPUs
-npus_count: [ 2 ]  # number of NPUs
+# 2 NPUs 
+npus_count: [2] # number of NPUs
 
 # Bandwidth per each link (per direction)
-bandwidth: [ 2 ]  # GB/s
+bandwidth: [32] # GB/s
 
 # Latency per each link
-latency: [ 500000.0 ]  # ns
+latency: [50000.0] # ns
+
+# Node types
+nodes: [GPU, CME_BIG] # GPU, CPU, CME_BIG, CME_SMALL

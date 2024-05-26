@@ -6,6 +6,7 @@ LICENSE file in the root directory of this source tree.
 #include <astra-network-analytical/common/EventQueue.hh>
 #include <astra-network-analytical/common/NetworkParser.hh>
 #include <astra-network-analytical/congestion_aware/Helper.hh>
+#include <astra-network-analytical/common/Type.hh>
 #include <remote_memory_backend/analytical/AnalyticalRemoteMemory.hh>
 #include "common/CmdLineParser.hh"
 #include "congestion_aware/CongestionAwareNetworkApi.hh"
@@ -31,9 +32,11 @@ int main(int argc, char* argv[]) {
       cmd_line_parser.get<std::string>("system-configuration");
   const auto remote_memory_configuration =
       cmd_line_parser.get<std::string>("remote-memory-configuration");
+  const auto compute_model = 
+      cmd_line_parser.get<std::string>("compute-model");
   const auto network_configuration =
       cmd_line_parser.get<std::string>("network-configuration");
-  const auto num_queues_per_dim =
+  const auto num_queues_per_dim = 
       cmd_line_parser.get<int>("num-queues-per-dim");
   const auto comm_scale = cmd_line_parser.get<double>("comm-scale");
   const auto injection_scale = cmd_line_parser.get<double>("injection-scale");
@@ -68,14 +71,23 @@ int main(int argc, char* argv[]) {
     queues_per_dim.push_back(num_queues_per_dim);
   }
 
+  assert(npus_count == network_parser.get_id_to_compute().size());
+  assert(npus_count == network_parser.get_compute_to_id().size());
+
   for (int i = 0; i < npus_count; i++) {
     // create network and system
     auto network_api = std::make_unique<CongestionAwareNetworkApi>(i);
+    int system_type_id = (int) network_parser.get_id_to_compute().at(i);
+    // WARNING: DIRTY CODE
+    // SystemType system_type = static_cast<SystemType>(network_parser.get_id_to_compute().at(i));
+
     auto* const system = new Sys(
         i,
         workload_configuration,
         comm_group_configuration,
         system_configuration,
+        compute_model,
+        system_type_id,
         memory_api.get(),
         network_api.get(),
         npus_count_per_dim,

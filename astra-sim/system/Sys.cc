@@ -30,6 +30,13 @@ LICENSE file in the root directory of this source tree.
 #include "astra-sim/system/topology/BasicLogicalTopology.hh"
 #include "astra-sim/system/topology/GeneralComplexTopology.hh"
 
+// Compute API
+#include "astra-sim/system/CMEBigModel.hh"
+#include "astra-sim/system/A100Model.hh"
+
+
+#include "Sys.hh"
+
 using namespace std;
 using namespace Chakra;
 using json = nlohmann::json;
@@ -140,6 +147,8 @@ Sys::Sys(
     string workload_configuration,
     string comm_group_configuration,
     string system_configuration,
+    string compute_model,
+    int system_type_id,
     AstraRemoteMemoryAPI* remote_mem,
     AstraNetworkAPI* comm_NI,
     vector<int> physical_dims,
@@ -157,9 +166,48 @@ Sys::Sys(
 
   this->workload = nullptr;
 
-  this->roofline_enabled = false;
+  this->roofline_enabled = compute_model == "roofline";
   this->peak_perf = 0;
   this->roofline = nullptr;
+
+  // compute API setup
+  this->compute_model_enabled = compute_model == "compute-api";
+  this->compute_api = nullptr;
+
+  switch (system_type_id)
+  {
+  case static_cast<int>(SystemType::GPU):
+    cout << "[DEBUG] construct Sys GPU\n";
+    this->compute_api = new A100Model();
+    
+    break;
+
+    case static_cast<int>(SystemType::CPU):
+    cerr << "CPU System Not Implemented\n";
+    
+    break;
+
+    case static_cast<int>(SystemType::CME_SMALL):
+    cout << "CME Small not implemented\n";
+    // this->compute_api = new CMESmall();
+    
+    break;
+
+    case static_cast<int>(SystemType::CME_BIG):
+    cout << "[DEBUG] construct Sys CME_BIG\n";
+    this->compute_api = new CMEBigModel();
+    
+    break;
+  
+  default:
+    cerr << "Error setting up compute API\n";
+    exit(-5);
+  }
+
+  assert(this->compute_api != nullptr);
+  this->system_type = static_cast<SystemType>(system_type_id);
+
+  this->replay = compute_model == "replay";
 
   this->remote_mem = remote_mem;
   this->remote_mem->set_sys(id, this);
@@ -202,6 +250,9 @@ Sys::Sys(
     sys_panic(
         "Unable to initialize the system layer because the file can not be openned");
   }
+
+  // DEBUG
+  cout << "[DEBUG] Sys Constructor ID-" << this->id << " of type " << (int) this->system_type << endl;
 
   // scheduler
   this->physical_dims = physical_dims;
