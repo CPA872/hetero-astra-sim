@@ -1,7 +1,7 @@
 #! /bin/bash -v
 
 # Absolue path to this script
-ASTRA_ROOT=/home/cx872/Documents/ucsd/cxl-llm/astra-sim
+ASTRA_ROOT=/home/cx872/Documents/ucsd/cxl-llm/hetero-astra-sim
 SCRIPT_DIR=$(dirname "$(realpath $0)")
 
 # Absolute paths to useful directories
